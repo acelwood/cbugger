@@ -1,0 +1,12 @@
+[
+{
+    "id" : "file",
+    "children":
+    [
+    {
+    	"caption": "Debugger",
+    	"command": "example"
+    }
+    ]
+}
+]

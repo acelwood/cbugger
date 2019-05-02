@@ -1,0 +1,33 @@
+[
+{
+    "id" : "debugger",
+    "caption": "Debugger",
+    "children":
+    [
+    {
+    	"caption": "Start Debugger",
+    	"children":
+    	[
+    		{
+    			"command": "start_debugger",
+    			"args": {"local": "True"},
+    			"caption": "Local"
+    		},
+    		{
+    			"command": "load_debugger",
+    			"args": {"local": "False"},
+    			"caption": "Remote"
+    		},
+    	]
+    },
+    {
+    	"caption": "Run",
+    	"command": "run_debugger"
+    },
+    {
+    	"caption": "Set Breakpoint",
+    	"command": "set_breakpoint"
+    }
+    ]
+}
+]

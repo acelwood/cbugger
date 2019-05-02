@@ -1,0 +1,53 @@
+[
+{
+    "id" : "debugger",
+    "caption": "Debugger",
+    "children":
+    [
+    {
+        "caption": "Launch Debugger",
+        "children":
+        [
+            {
+                "command": "start_debugger",
+                "args": {"local": "True"},
+                "caption": "Local"
+            },
+            {
+                "command": "start_debugger",
+                "args": {"local": "False"},
+                "caption": "Remote"
+            },
+        ]
+    },
+    {
+        "caption": "Set Arguments",
+        "children":
+        [
+            {
+                "command": "set_debugger_input",
+                "args": { "isStdIn": "False" } ,
+                "caption": "Command Line Args"
+            },
+            {
+                "command": "set_debugger_input",
+                "args": { "isStdIn": "True" } ,
+                "caption": "Standard Input"
+            }
+        ]
+    },
+    {
+        "caption": "Recompile",
+        "command": "recompile_executable"
+    },
+    {
+        "caption": "Add Variables to Print...",
+        "command": "setup_printing"
+    },
+    {
+        "caption": "Run",
+        "command": "run_debugger"
+    }
+    ]
+}
+]

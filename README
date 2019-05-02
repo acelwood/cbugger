@@ -1,0 +1,13 @@
+SENIOR PROJECT WORK
+
+- load executable, optionally through SFTP
+- use pygdbmi?
+
+
+- set/remove breakpoints
+- make keyboard shortcut
+
+
+- can edit view with text command (insert text)
+- need to format it so it doesn't look like other C syntax or comments
+- clear on edit

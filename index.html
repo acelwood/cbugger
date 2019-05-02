@@ -4,18 +4,18 @@
 
 <div style="text-align: center">
 	<h1> C-Bugger</h1> 
-	<h2> A Sublime Text Plugin for Remote Debugging of C Programs</h2> 
-	<h3> A Senior Project in Computer Science at Yale Univeristy </h3> 
+	<h2> A Remote Debugger </h2> 
+	<h3> A Senior Project in Computer Science at Yale University </h3> 
 	<h3>By: Addie Elwood</h3> 
 	<h3>Advisor: James Glenn</h3>
 </div>
 
-<p> <b> Abstract: </b>  </p>
+<p> <b> Abstract: </b> In computer science classes, learning how to debug a program can be just as difficult as learning how to write it in the first place. Due to a limited number of tools for C programs, the main debugging challenges for Yale students taking the core sequence are: the most popular debugger (gdb) has a steep learning curve because it is text-based, the results of the debugger are divorced from the code, and programs should ideally be debugged on the Zoo where the final test scripts are run. Therefore, the purpose of this project is to provide a more intuitive and accessible interface for debugging C programs that displays the debugging results in relation to the code that produced it, and allows debugging to take place on a remote computer system. This was achieved by developing a plugin for Sublime Text 3, a popular text editor used by Yale students. It already has a plugin for remotely editing files, which was the inspiration for creating a plugin for remote debugging. The Sublime Text API provides front-end functionality, and the python library paramiko is used to open an SSH connection to the remote server, where gdb is launched to perform the actual debugging commands. This plugin is currently integrated with the SFTP plugin to retrieve information about the remote servers in order to log in. The user selects what remote server to debug on, and then selects what executable file to run in the debugger. From there, the user can perform most standard debugging operations by clicking in Sublime: setting and removing breakpoints with a right-click on a line, setting command line arguments and standard input files, running the debugger, selecting what to do next after hitting a breakpoint. This project successfully functions as a simple remote debugging tool compatible with C programs, and there are many possible enhancements such as integrating more gdb commands or adding valgrind capabilities. </p>
 
 <hr>
-Code: <a href="https://github.com/acelwood/cbugger"> </a> <br>
-Final Report: <a href="https://github.com/acelwood/cbugger/CPSC490_Final_Report.pdf"> </a> <br>
-Original Proposal: <a href="https://github.com/acelwood/cbugger/CPSC490_Proposal.pdf"> </a> <br>
+Code: <a href="https://github.com/acelwood/cbugger"> GitHub </a> <br>
+Final Report: <a href="https://nbviewer.jupyter.org/github/acelwood/cbugger/blob/master/CPSC490_Final_Report.pdf"> Link Here </a> <br>
+Original Proposal: <a href="https://nbviewer.jupyter.org/github/acelwood/cbugger/blob/master/CPSC490_Proposal.pdf"> Link Here </a> <br>
 <hr>
 
 

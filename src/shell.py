@@ -19,6 +19,7 @@ class GDBHandler:
         # self.here_doc = ""
 
         self.variables = []
+        self.recent_vars = []
 
     def __del__(self):
         self.shell.close()
@@ -34,9 +35,10 @@ class GDBHandler:
     def add_variables(self, var_list):
         self.variables += var_list
 
-    # currently here doc is limited to one line only
-    # def set_here_doc(self, string):
-    #     self.here_doc = string.strip("\n")
+    def remove_variables(self, var_list):
+        for var in var_list:
+            if var in self.variables:
+                self.variables.remove(var)
 
     # maybe fix this weird inheritance thing eesh
     def execute(self, cmd):

@@ -253,23 +253,32 @@ class RecompileExecutableCommand(sublime_plugin.TextCommand):
 
 		stdout = stdout.readlines()
 		stderr = stderr.readlines()
+		panel_name = 'make'
+
+		# how to display warnings
 
 		if exit_status != 0:
-			panel_name = 'make'
+			# panel_name = 'make'
 			error_text = "".join(stderr)
 
 			# HOW TO MAKE PRETTY COLORS FOR ERRORS
 			v = sublime.active_window().create_output_panel(panel_name)
 			v.run_command("display_text_in_panel", { "text": error_text})
 				
-			sublime.active_window().run_command("show_panel", {"panel": "output." + panel_name})
+			if sublime.active_window().active_panel() != panel_name:
+				sublime.active_window().run_command("show_panel", {"panel": "output." + panel_name})
 
 			sublime.error_message("Make failed")
 
 
 		else:
-			panel_name = 'debug'
-			text = "CBUGGER MESSAGE: successfully recompiled"
+			# panel_name = 'debug'
+			text = "CBUGGER MESSAGE: successfully recompiled\n"
+
+			if len(stderr) > 0:
+				text += "With Warnings:\n"
+				for line in stderr:
+					text += line
 
 			# HOW TO MAKE APPROPRIATE SIZE
 			v = sublime.active_window().create_output_panel(panel_name)
@@ -320,7 +329,7 @@ class SetupPrintingCommand(sublime_plugin.TextCommand):
 			return
 
 		def get_line(string):
-			variables = re.split(",\s*|\s+", string) # [var.split(" ") for var in string.split(", ")]
+			variables = re.split(",\s*|\s+", string) 
 			if variables[-1] == '':
 				variables.pop()
 
@@ -330,18 +339,6 @@ class SetupPrintingCommand(sublime_plugin.TextCommand):
 		sublime.active_window().show_input_panel("Variables", "", get_line, None, on_cancel)
 
 
-# class CustomizePrintingCommand(sublime_plugin.TextCommand):
-# 	def run(self, edit):
-# 		print("print")
-
-# class BreakpointHandlerCommand(sublime_plugin.TextCommand):
-# 	def run(self, edit):
-
-
-
-	
-
-	
 
 
 

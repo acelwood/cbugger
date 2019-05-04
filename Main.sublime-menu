@@ -41,7 +41,7 @@
         "command": "recompile_executable"
     },
     {
-        "caption": "Add Variables to Print...",
+        "caption": "Set Variables to Display...",
         "command": "setup_printing"
     },
     {

@@ -39,11 +39,12 @@ def launch_remote(executable_file, shell, source_path):
 	shell.files.append(file)
 
 	for num in breakpoints:
-		set_breakpoint_in_gdb(shell, file, num)
+		set_breakpoint_in_gdb(shell, num)
 
 
-def set_breakpoint_in_gdb(shell, file, num):
+def set_breakpoint_in_gdb(shell, num):
 
+	file = breakpoints[num]['file']
 	set_breakpoint_cmd = "-break-insert " + file + ":" + str(num)
 	_,stdout,_ = shell.execute_in_gdb(set_breakpoint_cmd)
 
@@ -57,7 +58,7 @@ def set_breakpoint_in_gdb(shell, file, num):
 		else:
 			print("One of your breakpoints is invalid. Moving to the next")
 	else:
-		breakpoints[num] = int(msg['payload']['bkpt']['number'])
+		breakpoints[num]['num'] = int(msg['payload']['bkpt']['number'])
 
 	# print("shell files are "+str(shell.files))
 	# print(breakpoints)
@@ -65,7 +66,7 @@ def set_breakpoint_in_gdb(shell, file, num):
 
 
 def remove_breakpoint_in_gdb(shell, file, num):
-	rm_breakpoint_cmd = "-break-delete " + str(breakpoints[num])
+	rm_breakpoint_cmd = "-break-delete " + str(breakpoints[num]['num'])
 	_,stdout,_ = shell.execute_in_gdb(rm_breakpoint_cmd)
 
 	msg = stdout[0]
@@ -125,7 +126,7 @@ def debugger_handler(shell, panel_name, gdb_cmd):
 	elif reason == 'breakpoint-hit':
 		# other breakpoint info???
 		frame = stopped_message['payload']['frame']
-		stop_text += "Breakpoint hit: in file " + frame['file'] + " in function " + frame['func'] + " at line " + frame['line']
+		stop_text += "Breakpoint hit: " + frame['func'] + " :" + frame['file'] + ":" + frame['line']
 
 	elif reason == 'end-stepping-range':
 		# other breakpoint info???
@@ -347,13 +348,15 @@ def secondary_menu_handler(shell, panel_name, index):
 		sublime.active_window().show_quick_panel(remove_menu, remove_menu_handler)
 		
 	elif index == 4:
-		breakpoint_list = [ ("Line " + str(num)) for num in breakpoints]
-		breakpoint_menu = [ breakpoints[num] for num in breakpoints]
+		breakpoint_list = [ ("Line " + str(num)) for num in breakpoints if breakpoints[num]['enabled']]
+		breakpoint_menu = [ (num, breakpoints[num]['num']) for num in breakpoints if breakpoints[num]['enabled']]
 
 		def disable_menu_handler(index):
 			if index != -1:
-				bpt = breakpoint_menu[index]
-				_,stdout,_ = shell.execute_in_gdb("-break-disable " + str(bpt))
+				bpt_num = breakpoint_menu[index][1]
+				bpt_line = breakpoint_menu[index][0]
+				_,stdout,_ = shell.execute_in_gdb("-break-disable " + str(bpt_num))
+				breakpoints[bpt_line]['enabled'] = False
 
 			sublime.active_window().show_quick_panel(secondary_menu, secondary_menu_handler_wrapper)
 
@@ -361,13 +364,15 @@ def secondary_menu_handler(shell, panel_name, index):
 
 
 	elif index == 5:
-		breakpoint_list = [ ("Line " + str(num)) for num in breakpoints]
-		breakpoint_menu = [ breakpoints[num] for num in breakpoints]
+		breakpoint_list = [ ("Line " + str(num)) for num in breakpoints if not breakpoints[num]['enabled']]
+		breakpoint_menu = [ (num, breakpoints[num]['num']) for num in breakpoints if not breakpoints[num]['enabled']]
 
 		def enable_menu_handler(index):
 			if index != -1:
-				bpt = breakpoint_menu[index]
-				_,stdout,_ = shell.execute_in_gdb("-break-enable " + str(bpt))
+				bpt_num = breakpoint_menu[index][1]
+				bpt_line = breakpoint_menu[index][0]
+				_,stdout,_ = shell.execute_in_gdb("-break-enable " + str(bpt_num))
+				breakpoints[bpt_line]['enabled'] = True
 
 			sublime.active_window().show_quick_panel(secondary_menu, secondary_menu_handler_wrapper)
 

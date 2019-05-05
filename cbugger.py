@@ -166,14 +166,13 @@ class SetBreakpointCommand(sublime_plugin.TextCommand):
 		if line_number in breakpoints:
 			return
 
-		breakpoints[line_number] = -1
-		print("POINT IS")
-		print(point)
+		file = self.view.file_name().rsplit('/')[-1] 
+
+		breakpoints[line_number] = {'num': -1, 'enabled': True, 'file': file}
 		self.view.add_regions(key, point, "mark", "Packages/Cbugger/img/red_hex_smallest.png", sublime.HIDDEN | sublime.PERSISTENT)
 	
 		if shell is not None:
-			file = self.view.file_name().rsplit('/')[-1] # check this
-			success = set_breakpoint_in_gdb(shell, file, line_number)
+			success = set_breakpoint_in_gdb(shell, line_number)
 			
 			if success and file not in shell.files:
 				shell.files.append(file)
@@ -191,6 +190,8 @@ class ClearBreakpointCommand(sublime_plugin.TextCommand):
 		if shell is not None and line_number in breakpoints:
 			file = self.view.file_name().rsplit('/')[-1] # check this
 			remove_breakpoint_in_gdb(shell, file, line_number)
+		
+		if line_number in breakpoints:
 			breakpoints.pop(line_number)
 
 		print(breakpoints)
@@ -203,28 +204,40 @@ class DebuggerEventListener(sublime_plugin.EventListener):
 		# and reset something idk
 		if view.file_name() is not None:
 			file = view.file_name().rsplit('/')[-1]
-			if len(breakpoints) > 1 and shell is not None and file in shell.files:
+			if len(breakpoints) > 1:
 				for brkpt in breakpoints:
+					if breakpoints[brkpt]['file'] != file:
+						print("Not for this file")
+						continue
+						
 					breakpoint_name = "breakpoint" + str(brkpt)
-					if len(view.get_regions(breakpoint_name)) < 1:
+					if len(view.get_regions(breakpoint_name)) == 0:
+						print("Breakpoint not found: "+breakpoint_name)
 						continue 
 
+					print("Breakpoint found: "+breakpoint_name)
 					line = view.get_regions(breakpoint_name)[0]
 					num = view.rowcol(line.begin())[0] + 1
 
+					print(num)
 					# lines have been modified
 					if num != brkpt:
 						# remove old breakpoint
 						view.run_command("clear_bookmarks", {"name" : breakpoint_name})
-						file = view.file_name().rsplit('/')[-1] # check this
-						remove_breakpoint_in_gdb(shell, file, brkpt)
+						enabled = breakpoints[brkpt]['enabled']
+						if shell is not None and file in shell.files:
+							remove_breakpoint_in_gdb(shell, file, brkpt)
 						breakpoints.pop(brkpt)
 
 						# set new breakpoint
 						key = "breakpoint" + str(num)
-						breakpoints[num] = -1
+						breakpoints[num] = {'num': -1, 'enabled': enabled, 'file': file}
 						view.add_regions(key, [line], "mark", "Packages/Cbugger/img/red_hex_smallest.png", sublime.HIDDEN | sublime.PERSISTENT)			
-						success = set_breakpoint_in_gdb(shell, file, num)
+						
+						if shell is not None and file in shell.files:
+							success = set_breakpoint_in_gdb(shell, num)
+							if breakpoints[num]['enabled'] == False:
+								_,stdout,_ = shell.execute_in_gdb("-break-disable " + str(breakpoints[num]['num']))
 							
 						print(breakpoints)
 			# sublime.error_message("Source file no longer matches executable")

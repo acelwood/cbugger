@@ -37,12 +37,12 @@
         ]
     },
     {
-        "caption": "Recompile",
-        "command": "recompile_executable"
-    },
-    {
         "caption": "Set Variables to Display...",
         "command": "setup_printing"
+    },
+    {
+        "caption": "Recompile",
+        "command": "recompile_executable"
     },
     {
         "caption": "Run",

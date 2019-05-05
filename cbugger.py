@@ -167,6 +167,8 @@ class SetBreakpointCommand(sublime_plugin.TextCommand):
 			return
 
 		breakpoints[line_number] = -1
+		print("POINT IS")
+		print(point)
 		self.view.add_regions(key, point, "mark", "Packages/Cbugger/img/red_hex_smallest.png", sublime.HIDDEN | sublime.PERSISTENT)
 	
 		if shell is not None:
@@ -194,8 +196,7 @@ class ClearBreakpointCommand(sublime_plugin.TextCommand):
 		print(breakpoints)
 
 
-# when view is modified
-# FIX THIS: remove breakpoints?
+# when view is modified --> maybe should have used ViewEventListener
 class DebuggerEventListener(sublime_plugin.EventListener):
 	def on_modified(self, view):
 		# fix to be only one warning
@@ -203,7 +204,29 @@ class DebuggerEventListener(sublime_plugin.EventListener):
 		if view.file_name() is not None:
 			file = view.file_name().rsplit('/')[-1]
 			if len(breakpoints) > 1 and shell is not None and file in shell.files:
-				print("Modified warning would go off in file: "+ file)
+				for brkpt in breakpoints:
+					breakpoint_name = "breakpoint" + str(brkpt)
+					if len(view.get_regions(breakpoint_name)) < 1:
+						continue 
+
+					line = view.get_regions(breakpoint_name)[0]
+					num = view.rowcol(line.begin())[0] + 1
+
+					# lines have been modified
+					if num != brkpt:
+						# remove old breakpoint
+						view.run_command("clear_bookmarks", {"name" : breakpoint_name})
+						file = view.file_name().rsplit('/')[-1] # check this
+						remove_breakpoint_in_gdb(shell, file, brkpt)
+						breakpoints.pop(brkpt)
+
+						# set new breakpoint
+						key = "breakpoint" + str(num)
+						breakpoints[num] = -1
+						view.add_regions(key, [line], "mark", "Packages/Cbugger/img/red_hex_smallest.png", sublime.HIDDEN | sublime.PERSISTENT)			
+						success = set_breakpoint_in_gdb(shell, file, num)
+							
+						print(breakpoints)
 			# sublime.error_message("Source file no longer matches executable")
 
 

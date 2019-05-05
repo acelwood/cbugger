@@ -347,29 +347,31 @@ def secondary_menu_handler(shell, panel_name, index):
 		sublime.active_window().show_quick_panel(remove_menu, remove_menu_handler)
 		
 	elif index == 4:
-		breakpoint_menu = [ [str(breakpoints[num]), (str(breakpoints[num]) + " at line " + str(num))] for num in breakpoints]
+		breakpoint_list = [ ("Line " + str(num)) for num in breakpoints]
+		breakpoint_menu = [ breakpoints[num] for num in breakpoints]
 
 		def disable_menu_handler(index):
 			if index != -1:
-				bpt = breakpoint_menu[index][0]
-				_,stdout,_ = shell.execute_in_gdb("-break-disable " + bpt)
+				bpt = breakpoint_menu[index]
+				_,stdout,_ = shell.execute_in_gdb("-break-disable " + str(bpt))
 
 			sublime.active_window().show_quick_panel(secondary_menu, secondary_menu_handler_wrapper)
 
-		sublime.active_window().show_quick_panel(breakpoint_menu, disable_menu_handler)
+		sublime.active_window().show_quick_panel(breakpoint_list, disable_menu_handler)
 
 
 	elif index == 5:
-		breakpoint_menu = [ [str(breakpoints[num]), (str(breakpoints[num]) + " at line " + str(num))] for num in breakpoints]
+		breakpoint_list = [ ("Line " + str(num)) for num in breakpoints]
+		breakpoint_menu = [ breakpoints[num] for num in breakpoints]
 
 		def enable_menu_handler(index):
 			if index != -1:
-				bpt = breakpoint_menu[index][0]
-				_,stdout,_ = shell.execute_in_gdb("-break-enable " + bpt)
+				bpt = breakpoint_menu[index]
+				_,stdout,_ = shell.execute_in_gdb("-break-enable " + str(bpt))
 
 			sublime.active_window().show_quick_panel(secondary_menu, secondary_menu_handler_wrapper)
 
-		sublime.active_window().show_quick_panel(breakpoint_menu, enable_menu_handler)
+		sublime.active_window().show_quick_panel(breakpoint_list, enable_menu_handler)
 
 	elif index == 6:
 		# go back to main menu

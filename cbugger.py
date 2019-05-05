@@ -270,6 +270,32 @@ class RecompileExecutableCommand(sublime_plugin.TextCommand):
 			if sublime.active_window().active_panel() != panel_name:
 				sublime.active_window().run_command("show_panel", {"panel": "output." + panel_name})
 
+			phantom_set = sublime.PhantomSet(self.view, "make")
+			phantoms = []
+
+			file = self.view.file_name().rsplit('/')[-1] 
+			for line in stderr:
+				# right now only display in current file
+				tokens = line.split(":") 
+				if tokens[0] != file or not tokens[1].isdigit():
+					continue
+
+				line_num = int(tokens[1])
+				region_start = self.view.text_point(line_num + 1, 0)
+				region_end = self.view.text_point(line_num + 2, 0)
+
+				print(tokens)
+				print(region_start)
+				print(region_end)
+				if tokens[3].contains('error'):
+					phantom = sublime.Phantom(sublime.Region(region_start, region_end),
+												)
+
+					phantoms.append(phantom)
+
+				# elif tokens[3].contains('warning'):
+
+			phantom_set.update(phantoms)
 			sublime.error_message("Make failed")
 
 

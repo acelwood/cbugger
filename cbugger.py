@@ -20,13 +20,8 @@ from Cbugger.src.debugger import *
 shell = None
 
 class StartDebuggerCommand(sublime_plugin.TextCommand):
-	def run(self, edit, local):
-
-		if local == "True":
-			self.start_local_debugger(edit)
-		else:
-			self.start_remote_debugger(edit)
-
+	def run(self, edit):
+		self.start_remote_debugger(edit)
 
 	def start_remote_debugger(self, edit):
 		# using SFTP directory
@@ -128,33 +123,6 @@ class StartDebuggerCommand(sublime_plugin.TextCommand):
 			
 		sublime.active_window().show_quick_panel(remote_list, choose_remote)
 		# continues asynchronously
-
-
-	def start_local_debugger(self, edit):
-		if self.view.file_name() is None:
-			sublime.error_message("Select which file to debug by making sure you clicked in it")
-			return
-
-		local_folder = path.dirname(self.view.file_name())
-		local = [f for f in listdir(local_folder)]
-
-		def choose_local(index):
-			if index == -1:
-				return
-
-			nonlocal local_folder
-			nonlocal local
-			local_folder += "/" + local[index]
-
-			if path.isdir(local_folder):
-				local = [f for f in listdir(local_folder)]
-				sublime.active_window().show_quick_panel(local, choose_local)
-			else:
-				launch_local(local_folder)
-
-		# END OF CHOOSE LOCAL FUNCTION
-		sublime.active_window().show_quick_panel(local, choose_local)
-
 
 # also it's going to break as soon as the line numbers shift
 class SetBreakpointCommand(sublime_plugin.TextCommand):
@@ -282,7 +250,6 @@ class RecompileExecutableCommand(sublime_plugin.TextCommand):
 			sublime.error_message("Please choose an executable to compile")
 			return
 
-		# print(shell.current_directory)
 		# expand to more customizable (not just make, make + exe name, make in a different folder?)
 		_,stdout,stderr,exit_status = shell.execute_separate("make")
 

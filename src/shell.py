@@ -51,7 +51,6 @@ class GDBHandler:
         return self.shell.execute_in_running(cmd)
 
     def execute_separate(self, cmd):
-        print(self.current_directory)
         full_cmd = "cd " + self.current_directory + "; " + cmd
         ssh = self.shell.ssh
         stdin, stdout, stderr = ssh.exec_command(full_cmd)

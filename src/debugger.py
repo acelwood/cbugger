@@ -60,8 +60,6 @@ def set_breakpoint_in_gdb(shell, num):
 	else:
 		breakpoints[num]['num'] = int(msg['payload']['bkpt']['number'])
 
-	# print("shell files are "+str(shell.files))
-	# print(breakpoints)
 	return True
 
 
@@ -72,28 +70,6 @@ def remove_breakpoint_in_gdb(shell, file, num):
 	msg = stdout[0]
 	if msg['message'] == 'error':
 		print("Breakpoint does not exist") # other error possibilities?
-
-
-def launch_local(executable_file):
-
-	# potentially choose debug tool based on OS 
-	# or let user pick
-	proc = subprocess.Popen(["lldb", executable_file], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-	
-	# detect error if executable not chosen
-	if proc.stderr.readline():
-		executable_file = None
-		sublime.error_message("The file you have chosen is not a valid executable or has permissions errors")
-		# close process
-		proc.terminate() # cleaner/better to send signal???
-		return
-		# return
-
-	# else
-	# NEED TO PUT THIS IN ANOTHER THREAD
-	# HOLY SHIT PARALLEL PROGRAMMING IS USEFUL
-	# temporary
-	proc.terminate()
 
 
 def debugger_handler(shell, panel_name, gdb_cmd):
@@ -126,22 +102,23 @@ def debugger_handler(shell, panel_name, gdb_cmd):
 	elif reason == 'breakpoint-hit':
 		# other breakpoint info???
 		frame = stopped_message['payload']['frame']
-		stop_text += "Breakpoint hit: " + frame['func'] + " :" + frame['file'] + ":" + frame['line']
+		stop_text += "Breakpoint hit: " + frame['func'] + " - " + frame['file'] + ":" + frame['line'] 
 
 	elif reason == 'end-stepping-range':
-		# other breakpoint info???
 		frame = stopped_message['payload']['frame']
-		stop_text += "Next line: in file " + frame['file'] + " in function " + frame['func'] + " at line " + frame['line']
+		# for next or step
+		stop_text += "Next line: " + frame['func'] + " - " + frame['file'] + ":" + frame['line'] 
 
 	elif reason == 'signal-received':
 		# seg fault handle
-		stop_text += "Signal Received: " + stopped_message['payload']['signal-meaning']
 		if stopped_message['payload']['signal-name'] == 'SIGSEGV':
+			stop_text += "SEGMENTATION FAULT"
 			# don't print variables
 			reason = 'exited'
-
+		else:
+			stop_text += "Signal Received: " + stopped_message['payload']['signal-meaning']
+	
 	else:
-		# seg fault handle
 		print("OTHER REASON STOPPED")
 		print(stopped_message['payload'])
 
@@ -229,7 +206,6 @@ def menu_handler(shell, panel_name, index):
 				v = sublime.active_window().create_output_panel(panel_name)
 
 			v.run_command("display_text_in_panel", { "text": text})
-			print(text)
 			if sublime.active_window().active_panel() != panel_name:
 				sublime.active_window().run_command("show_panel", {"panel": "output." + panel_name})
 

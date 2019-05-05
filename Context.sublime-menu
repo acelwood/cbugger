@@ -1,17 +1,12 @@
 [
 {
     "id" : "debugger",
-    "caption": "Debugger",
-    "children":
-    [
-    {
-    	"caption": "Set Breakpoint",
-    	"command": "set_breakpoint"
-    },
-    {
-        "caption": "Remove Breakpoint",
-        "command": "clear_breakpoint"
-    }
-    ]
+    "caption": "Set Breakpoint",
+    "command": "set_breakpoint"
+},
+{
+    "id" : "debugger",
+    "caption": "Remove Breakpoint",
+    "command": "clear_breakpoint"
 }
 ]

@@ -5,20 +5,8 @@
     "children":
     [
     {
-        "caption": "Launch Debugger",
-        "children":
-        [
-            {
-                "command": "start_debugger",
-                "args": {"local": "True"},
-                "caption": "Local"
-            },
-            {
-                "command": "start_debugger",
-                "args": {"local": "False"},
-                "caption": "Remote"
-            },
-        ]
+        "caption": "Launch Remote Debugger",
+        "command": "start_debugger"
     },
     {
         "caption": "Set Arguments",

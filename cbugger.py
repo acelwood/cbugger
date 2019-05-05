@@ -14,7 +14,7 @@ import Cbugger.src.debugger
 imp.reload(Cbugger.src.shell)
 imp.reload(Cbugger.src.debugger)
 
-from Cbugger.src.shell import GDBHandler
+from Cbugger.src.shell import GDBHandler, set_args_in_gdb
 from Cbugger.src.debugger import *
 
 shell = None
@@ -304,14 +304,15 @@ class ClearPanelCommand(sublime_plugin.TextCommand):
 class RunDebuggerCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
 		if shell is None:
-			sublime.error_message("Please choose an executable to run")
+			sublime.active_window().run_command("start_debugger")
+			#self.view.run_command
+			#sublime.error_message("Please choose an executable to run")
 			return
 
 		panel_name = 'debug'
+		v = sublime.active_window().create_output_panel(panel_name)
 
-		v = sublime.active_window().find_output_panel(panel_name)
-		if v is not None:
-			v.run_command("clear_panel")
+		set_args_in_gdb(shell)
 
 		gdb_cmd = "-exec-run"
 		debugger_handler(shell, panel_name, gdb_cmd)

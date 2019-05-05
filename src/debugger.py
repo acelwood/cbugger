@@ -21,18 +21,22 @@ def launch_remote(executable_file, shell, source_path):
 	shell.current_directory = stdout[0].strip("\n")
 
 	# ERROR CATCHING if gdb doesn't launch?
-	start_gdb_cmd = "gdb -q --interpreter=mi2 " + executable_file
+	start_gdb_cmd = "gdb -q --interpreter=mi2 "
 	_,stdout,_ = shell.execute_in_gdb(start_gdb_cmd)
 
-	shell.executable = executable_file.strip("\n")
-	
+	set_exe_cmd = "-file-exec-and-symbols " + executable_file
+	_,stdout,_ = shell.execute_in_gdb(set_exe_cmd)
+
 	# error handling here --> WHAT IF MORE LINES IN MESSAGE?
-	msg = stdout[0]
-	if msg['message'] == 'error':
+	msg = stdout[-1]
+	print(msg)
+	if msg['message'] == 'error': # or msg['payload'].contains("not in executable format"):
 		shell.executable = None
 		sublime.error_message("The file you have chosen is not a valid executable or has permissions errors")
 		# potentially call choose remote/open remote? although that's messy now
 		return
+	
+	shell.executable = executable_file.strip("\n")
 	
 	# else add breakpoints & start debugging!
 	file = source_path.rsplit('/')[-1]
@@ -70,6 +74,17 @@ def remove_breakpoint_in_gdb(shell, file, num):
 	msg = stdout[0]
 	if msg['message'] == 'error':
 		print("Breakpoint does not exist") # other error possibilities?
+
+
+def set_args_in_gdb(shell):
+
+    set_args_cmd = "-exec-arguments " + shell.command_line_args
+    if shell.stdin_file is not None:
+        set_args_cmd += (" < " + shell.stdin_file)
+
+    _,stdout,_ = shell.execute_in_gdb(set_args_cmd)
+    print(set_args_cmd)
+    print(stdout)
 
 
 def debugger_handler(shell, panel_name, gdb_cmd):
@@ -324,13 +339,13 @@ def secondary_menu_handler(shell, panel_name, index):
 		sublime.active_window().show_quick_panel(remove_menu, remove_menu_handler)
 		
 	elif index == 4:
-		breakpoint_list = [ ("Line " + str(num)) for num in breakpoints if breakpoints[num]['enabled']]
+		breakpoint_list = ['Back'] + [ ("Line " + str(num)) for num in breakpoints if breakpoints[num]['enabled']]
 		breakpoint_menu = [ (num, breakpoints[num]['num']) for num in breakpoints if breakpoints[num]['enabled']]
 
 		def disable_menu_handler(index):
-			if index != -1:
-				bpt_num = breakpoint_menu[index][1]
-				bpt_line = breakpoint_menu[index][0]
+			if index > 0:
+				bpt_num = breakpoint_menu[index-1][1]
+				bpt_line = breakpoint_menu[index-1][0]
 				_,stdout,_ = shell.execute_in_gdb("-break-disable " + str(bpt_num))
 				breakpoints[bpt_line]['enabled'] = False
 
@@ -340,13 +355,13 @@ def secondary_menu_handler(shell, panel_name, index):
 
 
 	elif index == 5:
-		breakpoint_list = [ ("Line " + str(num)) for num in breakpoints if not breakpoints[num]['enabled']]
+		breakpoint_list = ['Back'] + [ ("Line " + str(num)) for num in breakpoints if not breakpoints[num]['enabled']]
 		breakpoint_menu = [ (num, breakpoints[num]['num']) for num in breakpoints if not breakpoints[num]['enabled']]
 
 		def enable_menu_handler(index):
-			if index != -1:
-				bpt_num = breakpoint_menu[index][1]
-				bpt_line = breakpoint_menu[index][0]
+			if index > 0:
+				bpt_num = breakpoint_menu[index-1][1]
+				bpt_line = breakpoint_menu[index -1][0]
 				_,stdout,_ = shell.execute_in_gdb("-break-enable " + str(bpt_num))
 				breakpoints[bpt_line]['enabled'] = True
 

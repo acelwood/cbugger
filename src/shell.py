@@ -15,8 +15,8 @@ class GDBHandler:
         self.files = []
 
         self.command_line_args = ""
-        self.stdin_file = None
-        # self.here_doc = ""
+        # better way to handle stdin if no file specified
+        self.stdin_file = "/dev/null"
 
         self.variables = []
         self.recent_vars = []
@@ -26,11 +26,9 @@ class GDBHandler:
 
     def set_input_file(self, file):
         self.stdin_file = file.strip("\n")
-        set_args_in_gdb(self)
 
     def set_cmd_line_args(self, string):
         self.command_line_args = string.strip("\n")
-        set_args_in_gdb(self)
 
     def add_variables(self, var_list):
         self.variables += var_list
@@ -51,21 +49,12 @@ class GDBHandler:
         return self.shell.execute_in_running(cmd)
 
     def execute_separate(self, cmd):
-        full_cmd = "cd " + self.current_directory + "; " + cmd
+        full_cmd = "cd " + self.current_directory + "; LC_COLLATE=\"en_US\" " + cmd
         ssh = self.shell.ssh
         stdin, stdout, stderr = ssh.exec_command(full_cmd)
         exit_status = stdout.channel.recv_exit_status()
         
         return stdin, stdout, stderr, exit_status
-
-
-def set_args_in_gdb(shell):
-
-    set_args_cmd = "-exec-arguments " + shell.command_line_args
-    if shell.stdin_file is not None:
-        set_args_cmd += (" < " + shell.stdin_file)
-
-    _,stdout,_ = shell.execute_in_gdb(set_args_cmd)
 
 
 class ShellHandler:

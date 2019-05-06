@@ -7,20 +7,24 @@ from os import listdir, path
 import json
 import imp
 import re
+import html
 
 import Cbugger.src.shell
 import Cbugger.src.debugger
 
 imp.reload(Cbugger.src.shell)
 imp.reload(Cbugger.src.debugger)
+imp.reload(Cbugger.src.phantoms)
 
 from Cbugger.src.shell import GDBHandler, set_args_in_gdb
 from Cbugger.src.debugger import *
+from Cbugger.src.phantoms import *
 
 shell = None
 
 class StartDebuggerCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
+		clear_all_phantoms(self.view, edit)
 		self.start_remote_debugger(edit)
 
 	def start_remote_debugger(self, edit):
@@ -250,6 +254,7 @@ class RecompileExecutableCommand(sublime_plugin.TextCommand):
 			sublime.error_message("Please choose an executable to compile")
 			return
 
+		clear_all_phantoms(self.view, edit)
 		# expand to more customizable (not just make, make + exe name, make in a different folder?)
 		_,stdout,stderr,exit_status = shell.execute_separate("make")
 
@@ -258,7 +263,6 @@ class RecompileExecutableCommand(sublime_plugin.TextCommand):
 		panel_name = 'make'
 
 		# how to display warnings
-
 		if exit_status != 0:
 			# panel_name = 'make'
 			error_text = "".join(stderr)
@@ -270,8 +274,8 @@ class RecompileExecutableCommand(sublime_plugin.TextCommand):
 			if sublime.active_window().active_panel() != panel_name:
 				sublime.active_window().run_command("show_panel", {"panel": "output." + panel_name})
 
-			phantom_set = sublime.PhantomSet(self.view, "make")
-			phantoms = []
+			# phantom_set = sublime.PhantomSet(self.view, "make")
+			# phantoms = []
 
 			file = self.view.file_name().rsplit('/')[-1] 
 			for line in stderr:
@@ -281,21 +285,46 @@ class RecompileExecutableCommand(sublime_plugin.TextCommand):
 					continue
 
 				line_num = int(tokens[1])
-				region_start = self.view.text_point(line_num + 1, 0)
-				region_end = self.view.text_point(line_num + 2, 0)
+				region_start = self.view.text_point(line_num, 0)
+				region_end = self.view.text_point(line_num + 1, 0) - 2
 
 				print(tokens)
 				print(region_start)
 				print(region_end)
-				if tokens[3].contains('error'):
-					phantom = sublime.Phantom(sublime.Region(region_start, region_end),
-												)
 
-					phantoms.append(phantom)
+				# def on_phantom_navigate(url):
+				# 	print("Navigated")
+					# hide phantoms
+					#self.view.erase_phantoms("make")
+					
+				text = tokens[4]
 
-				# elif tokens[3].contains('warning'):
+				if tokens[3].lstrip().startswith('error'):
+					message = "\t\t// COMPILER ERROR: " + tokens[4].strip("\n")
 
-			phantom_set.update(phantoms)
+					self.view.insert(edit, region_end, message)
+					inserted = sublime.Region(region_end, region_end+len(message))
+					compiler_phantoms.append(inserted)
+					# phantom = sublime.Phantom(sublime.Region(region_start, region_end),
+					# 					('<body id=inline-error>' + stylesheet +
+			  #                           '<div class="error-arrow"></div><div class="error">' +
+			  #                           '<span class="message">' + html.escape(text, quote=False) + '</span>' +
+			  #                           '<a href=hide>' + chr(0x00D7) + '</a></div>' +
+			  #                           '</body>'),
+			  #                           sublime.LAYOUT_INLINE,
+			  #                           on_phantom_navigate)
+
+					# print(phantom)
+					# phantoms.append(phantom)
+
+				elif tokens[3].lstrip().startswith('warning'):
+					message = "\t\t// COMPILER WARNING: " + tokens[4].strip("\n")
+
+					self.view.insert(edit, region_end, message)
+					inserted = sublime.Region(region_end, region_end+len(message))
+					compiler_phantoms.append(inserted)
+
+			# phantom_set.update(phantoms)
 			sublime.error_message("Make failed")
 
 
@@ -334,6 +363,8 @@ class RunDebuggerCommand(sublime_plugin.TextCommand):
 			#self.view.run_command
 			#sublime.error_message("Please choose an executable to run")
 			return
+
+		clear_all_phantoms(self.view, edit)
 
 		panel_name = 'debug'
 		v = sublime.active_window().create_output_panel(panel_name)

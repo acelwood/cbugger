@@ -277,52 +277,52 @@ class RecompileExecutableCommand(sublime_plugin.TextCommand):
 			# phantom_set = sublime.PhantomSet(self.view, "make")
 			# phantoms = []
 
-			file = self.view.file_name().rsplit('/')[-1] 
-			for line in stderr:
-				# right now only display in current file
-				tokens = line.split(":") 
-				if tokens[0] != file or not tokens[1].isdigit():
-					continue
+			# file = self.view.file_name().rsplit('/')[-1] 
+			# for line in stderr:
+			# 	# right now only display in current file
+			# 	tokens = line.split(":") 
+			# 	if tokens[0] != file or not tokens[1].isdigit() or len(tokens) < 5:
+			# 		continue
 
-				line_num = int(tokens[1])
-				region_start = self.view.text_point(line_num, 0)
-				region_end = self.view.text_point(line_num + 1, 0) - 2
+			# 	line_num = int(tokens[1])
+			# 	region_start = self.view.text_point(line_num, 0)
+			# 	region_end = self.view.text_point(line_num + 1, 0) - 2
 
-				print(tokens)
-				print(region_start)
-				print(region_end)
+			# 	print(tokens)
+			# 	print(region_start)
+			# 	print(region_end)
 
-				# def on_phantom_navigate(url):
-				# 	print("Navigated")
-					# hide phantoms
-					#self.view.erase_phantoms("make")
+			# 	# def on_phantom_navigate(url):
+			# 	# 	print("Navigated")
+			# 		# hide phantoms
+			# 		#self.view.erase_phantoms("make")
 					
-				text = tokens[4]
+			# 	text = tokens[4]
 
-				if tokens[3].lstrip().startswith('error'):
-					message = "\t\t// COMPILER ERROR: " + tokens[4].strip("\n")
+			# 	if tokens[3].lstrip().startswith('error'):
+			# 		message = "\t\t// COMPILER ERROR: " + tokens[4].strip("\n")
 
-					self.view.insert(edit, region_end, message)
-					inserted = sublime.Region(region_end, region_end+len(message))
-					compiler_phantoms.append(inserted)
-					# phantom = sublime.Phantom(sublime.Region(region_start, region_end),
-					# 					('<body id=inline-error>' + stylesheet +
-			  #                           '<div class="error-arrow"></div><div class="error">' +
-			  #                           '<span class="message">' + html.escape(text, quote=False) + '</span>' +
-			  #                           '<a href=hide>' + chr(0x00D7) + '</a></div>' +
-			  #                           '</body>'),
-			  #                           sublime.LAYOUT_INLINE,
-			  #                           on_phantom_navigate)
+			# 		self.view.insert(edit, region_end, message)
+			# 		inserted = sublime.Region(region_end, region_end+len(message))
+			# 		compiler_phantoms.append(inserted)
+			# 		# phantom = sublime.Phantom(sublime.Region(region_start, region_end),
+			# 		# 					('<body id=inline-error>' + stylesheet +
+			#   #                           '<div class="error-arrow"></div><div class="error">' +
+			#   #                           '<span class="message">' + html.escape(text, quote=False) + '</span>' +
+			#   #                           '<a href=hide>' + chr(0x00D7) + '</a></div>' +
+			#   #                           '</body>'),
+			#   #                           sublime.LAYOUT_INLINE,
+			#   #                           on_phantom_navigate)
 
-					# print(phantom)
-					# phantoms.append(phantom)
+			# 		# print(phantom)
+			# 		# phantoms.append(phantom)
 
-				elif tokens[3].lstrip().startswith('warning'):
-					message = "\t\t// COMPILER WARNING: " + tokens[4].strip("\n")
+			# 	elif tokens[3].lstrip().startswith('warning'):
+			# 		message = "\t\t// COMPILER WARNING: " + tokens[4].strip("\n")
 
-					self.view.insert(edit, region_end, message)
-					inserted = sublime.Region(region_end, region_end+len(message))
-					compiler_phantoms.append(inserted)
+			# 		self.view.insert(edit, region_end, message)
+			# 		inserted = sublime.Region(region_end, region_end+len(message))
+			# 		compiler_phantoms.append(inserted)
 
 			# phantom_set.update(phantoms)
 			sublime.error_message("Make failed")
@@ -342,8 +342,9 @@ class RecompileExecutableCommand(sublime_plugin.TextCommand):
 			# print success message
 			v.run_command("display_text_in_panel", { "text": text})
 				
-			sublime.active_window().run_command("show_panel", {"panel": "output." + panel_name})
-			
+			if sublime.active_window().active_panel() != panel_name:
+				sublime.active_window().run_command("show_panel", {"panel": "output." + panel_name})
+
 
 
 class DisplayTextInPanelCommand(sublime_plugin.TextCommand):

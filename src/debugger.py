@@ -117,12 +117,12 @@ def debugger_handler(shell, panel_name, gdb_cmd):
 	elif reason == 'breakpoint-hit':
 		# other breakpoint info???
 		frame = stopped_message['payload']['frame']
-		stop_text += "Breakpoint hit: " + frame['func'] + " - " + frame['file'] + ":" + frame['line'] 
+		stop_text += "Breakpoint hit: " + frame['file'] + ":" + frame['line'] + " - " + frame['func']
 
 	elif reason == 'end-stepping-range':
 		frame = stopped_message['payload']['frame']
 		# for next or step
-		stop_text += "Next line: " + frame['func'] + " - " + frame['file'] + ":" + frame['line'] 
+		stop_text += "Next line: " + frame['file'] + ":" + frame['line'] + " - " + frame['func']
 
 	elif reason == 'signal-received':
 		# seg fault handle

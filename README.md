@@ -1,4 +1,4 @@
-Abstract: In computer science classes, learning how to debug a program can be just as difficult as learning 
+**Abstract**: In computer science classes, learning how to debug a program can be just as difficult as learning 
 how to write it in the first place. Due to a limited number of tools for C programs, the main debugging challenges 
 for Yale students taking the core sequence are: the most popular debugger (gdb) has a steep learning curve because 
 it is text-based, the results of the debugger are divorced from the code, and programs should ideally be debugged on
@@ -34,7 +34,7 @@ To test or use the program:
 2. Open a file to edit using SFTP
 3. Select ‘Launch Remote Debugger’ under the ‘Debugger’ menu along the top bar
     a. If the ‘Debugger’ menu does not appear, reload Sublime Text and make sure the package was put in the right folder
-    b. On Mac, selecting CTRL-` will display the Python console and show any error messages that might be occurring.
+    b. On Mac, selecting CTRL-\` will display the Python console and show any error messages that might be occurring.
 4. Set inputs like command line arguments or standard input files, set variables to display.
 5. Set or remove breakpoints by right-clicking
 6. Select ‘Run’ under ‘Debugger’ to run the debugger!

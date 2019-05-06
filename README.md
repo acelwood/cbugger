@@ -33,8 +33,8 @@ To test or use the program:
 1. Setup Sublime SFTP plugin if it’s never been done before: https://docs.google.com/document/d/15kyAx28zdL9LvnCjwPzKDiFIzcNlsFVolT0F9bux4qE/edit?usp=sharing
 2. Open a file to edit using SFTP
 3. Select ‘Launch Remote Debugger’ under the ‘Debugger’ menu along the top bar
-    a. If the ‘Debugger’ menu does not appear, reload Sublime Text and make sure the package was put in the right folder
-    b. On Mac, selecting CTRL-\` will display the Python console and show any error messages that might be occurring.
+	- If the ‘Debugger’ menu does not appear, reload Sublime Text and make sure the package was put in the right folder
+    - On Mac, selecting CTRL-\` will display the Python console and show any error messages that might be occurring.
 4. Set inputs like command line arguments or standard input files, set variables to display.
 5. Set or remove breakpoints by right-clicking
 6. Select ‘Run’ under ‘Debugger’ to run the debugger!

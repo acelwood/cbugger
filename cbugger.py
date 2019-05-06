@@ -11,12 +11,13 @@ import html
 
 import Cbugger.src.shell
 import Cbugger.src.debugger
+import Cbugger.src.phantoms
 
 imp.reload(Cbugger.src.shell)
 imp.reload(Cbugger.src.debugger)
 imp.reload(Cbugger.src.phantoms)
 
-from Cbugger.src.shell import GDBHandler, set_args_in_gdb
+from Cbugger.src.shell import GDBHandler
 from Cbugger.src.debugger import *
 from Cbugger.src.phantoms import *
 

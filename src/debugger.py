@@ -87,7 +87,7 @@ def set_args_in_gdb(shell):
     print(stdout)
 
 
-def debugger_handler(shell, panel_name, gdb_cmd):
+def debugger_handler(shell, view, panel_name, gdb_cmd):
 
 	_,stdout,_ = shell.execute_in_running(gdb_cmd)
 	if len(stdout) == 0:
@@ -140,14 +140,34 @@ def debugger_handler(shell, panel_name, gdb_cmd):
 	text += (stop_text + '\n')
 
 	# display preset variables if at breakpoint
-	if not reason.startswith('exited') and len(shell.variables) > 0:
-		_,stdout,_ = shell.execute_in_gdb("-stack-list-variables --all-values")
-		text += "CBUGGER MESSAGE: Current value of variables\t (watch out for uninitialized)\n"
-		variables = stdout[-1]['payload']['variables'] # error handling
+	if not reason.startswith('exited'):
 
+		_,stdout,_ = shell.execute_in_gdb("-stack-list-variables --all-values")
+		variables = stdout[-1]['payload']['variables'] # error handling
+		var_text = ""
+		var_seen = False
+
+		# if len(shell.variables) > 0:
 		for var in variables:
 			if var['name'] in shell.variables:
-				text += ("CBUGGER: " + var['name'] + " = " + var['value'] + "\n")
+				var_seen = True
+				var_text += ("CBUGGER: " + var['name'] + " = " + var['value'] + "\n")
+
+		# display variables on this line
+		line_num = int(stopped_message['payload']['frame']['line'])
+		region_start = view.text_point(line_num - 1, 0)
+		line_string = view.substr(view.line(region_start))
+		line_tokens = line_string.split()
+		
+		for var in variables:
+			if var['name'] in line_tokens:
+				var_seen = True
+				var_text += ("CBUGGER: " + var['name'] + " = " + var['value'] + "\n")
+
+		if var_seen:
+			text += "CBUGGER MESSAGE: Variable values - note that current line has not executed\t(watch out for uninitialized)\n"
+			text += var_text
+
 
 	v.run_command("display_text_in_panel", { "text": text})
 
@@ -156,22 +176,23 @@ def debugger_handler(shell, panel_name, gdb_cmd):
 
 	# BAD ORGANIZING --> another function? another class? figure out the async thing
 	# how to make menu more compact?
-	if reason == 'breakpoint-hit' or reason == 'end-stepping-range':
+	# if reason == 'breakpoint-hit' or reason == 'end-stepping-range':
+	if not reason.startswith('exited'):
 		# KEY BINDINGS!!!
 		global menu
 		def menu_handler_wrapper(index):
-			menu_handler(shell, panel_name, index)
+			menu_handler(shell, view, panel_name, index)
 
 		# one potential issue: menu disappears quickly if select anywhere else
 		sublime.active_window().show_quick_panel(menu, menu_handler_wrapper)
 
-def menu_handler(shell, panel_name, index):
+def menu_handler(shell, view, panel_name, index):
 	global menu, secondary_menu
 	def menu_handler_wrapper(index):
-		menu_handler(shell, panel_name, index)
+		menu_handler(shell, view, panel_name, index)
 
 	def secondary_menu_handler_wrapper(index):
-		secondary_menu_handler(shell, panel_name, index)
+		secondary_menu_handler(shell, view, panel_name, index)
 	
 
 	if index == -1:
@@ -181,13 +202,13 @@ def menu_handler(shell, panel_name, index):
 
 	if index == 0:
 		# later specify how many # of times
-		debugger_handler(shell, panel_name, "-exec-continue")
+		debugger_handler(shell, view, panel_name, "-exec-continue")
 
 	elif index == 1:
-		debugger_handler(shell, panel_name, "-exec-next")
+		debugger_handler(shell, view, panel_name, "-exec-next")
 
 	elif index == 2:
-		debugger_handler(shell, panel_name, "-exec-step")
+		debugger_handler(shell, view, panel_name, "-exec-step")
 
 	elif index == 3:
 		# DO MORE WITH PRINTING FUN STUFF
@@ -246,13 +267,13 @@ def menu_handler(shell, panel_name, index):
 
 
 # more debugging commands
-def secondary_menu_handler(shell, panel_name, index):
+def secondary_menu_handler(shell, view, panel_name, index):
 	global menu, secondary_menu
 	def menu_handler_wrapper(index):
-		menu_handler(shell, panel_name, index)
+		menu_handler(shell, view, panel_name, index)
 
 	def secondary_menu_handler_wrapper(index):
-		secondary_menu_handler(shell, panel_name, index)
+		secondary_menu_handler(shell, view, panel_name, index)
 
 	def on_cancel():
 		# redisplay menu

@@ -373,7 +373,7 @@ class RunDebuggerCommand(sublime_plugin.TextCommand):
 		set_args_in_gdb(shell)
 
 		gdb_cmd = "-exec-run"
-		debugger_handler(shell, panel_name, gdb_cmd)
+		debugger_handler(shell, self.view, panel_name, gdb_cmd)
 
 	
 class SetupPrintingCommand(sublime_plugin.TextCommand):
